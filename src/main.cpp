@@ -20,36 +20,41 @@ public:
     };
 };
 
-// TODO: Hide this in some ugly macro... :'(
-struct Movable {
-    void (*move)(void *, int, int);
-
-    template <typename T>
-    Movable(T *)
-        : move{reinterpret_cast<decltype(move)>(T::move)} {}
+struct ThickPointerBase {
+    void *p;
 };
 
-template <typename Trait>
-struct ThickPointer {
-    void *p;
-    Trait trait;
+// TODO: Hide this in some ugly macro... :'(
+struct Movable : virtual ThickPointerBase {
+    void (*_move)(void *, int, int);
 
-    template <typename Type>
-    ThickPointer(Type *p)
-        : p{p}
-        , trait{Trait{p}} {
-    } // TODO: Statically create only one trait object per type
-
-    template <typename Type>
-    ThickPointer &operator=(Type *p) {
+    template <typename T>
+    Movable(T *p)
+        : _move{reinterpret_cast<decltype(_move)>(T::move)} {
         this->p = p;
-        this->trait = Trait{p};
+    }
 
+    template <typename T>
+    Movable &operator=(T *p) {
+        _move = reinterpret_cast<decltype(_move)>(T::move);
         return *this;
     }
 
     void move(int x, int y) {
-        trait.move(p, x, y);
+        _move(p, x, y);
+    }
+};
+
+template <typename Trait>
+struct ThickPointer : public Movable {
+    template <typename Type>
+    ThickPointer(Type *p)
+        : Trait{p} {} // TODO: Statically create only one trait object per type
+
+    template <typename Type>
+    ThickPointer &operator=(Type *p) {
+        Trait::operator=(p);
+        return *this;
     }
 };
 
