@@ -52,20 +52,18 @@ struct Movable {
     FunctionMemberDummy *p = nullptr;
     FunctionTable *_ftable;
 
-    template <typename T, typename... FuncS>
-    void _init(T *p) {
-        _ftable = functionTableInstance<T, Movable, FunctionTable, FuncS...>();
-    }
-
     template <typename T>
     Movable(T *p) {
-        _init<T,
-              FunctionTypeStruct<decltype(FunctionTable::move),
-                                 decltype(&T::move),
-                                 &T::move>,
-              FunctionTypeStruct<decltype(FunctionTable::jump),
-                                 decltype(&T::jump),
-                                 &T::jump>>(p);
+        _ftable = functionTableInstance<
+            T,
+            Movable,
+            FunctionTable,
+            FunctionTypeStruct<decltype(FunctionTable::move),
+                               decltype(&T::move),
+                               &T::move>,
+            FunctionTypeStruct<decltype(FunctionTable::jump),
+                               decltype(&T::jump),
+                               &T::jump>>();
         this->p = reinterpret_cast<FunctionMemberDummy *>(p);
     }
 
