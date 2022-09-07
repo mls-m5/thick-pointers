@@ -14,6 +14,7 @@ struct FunctionTypeStruct {
     constexpr static inline FunctionType FP = FunctionValue;
 };
 
+// The actual pointer type
 template <typename Trait>
 struct ThickPointer : public Trait {
     template <typename Type>
@@ -27,6 +28,7 @@ struct ThickPointer : public Trait {
     }
 };
 
+/// Create a single trait function table per class
 template <typename Type, typename Trait, typename Table, typename... FuncS>
 auto *functionTableInstance() {
     // I would prefere to not create this on the heap, but the compiler throws
@@ -48,33 +50,32 @@ struct Movable {
     };
 
     FunctionMemberDummy *p = nullptr;
-
     FunctionTable *_ftable;
 
     template <typename T, typename... FuncS>
-    void init(T *p) {
+    void _init(T *p) {
         _ftable = functionTableInstance<T, Movable, FunctionTable, FuncS...>();
     }
 
     template <typename T>
     Movable(T *p) {
-        init<T,
-             FunctionTypeStruct<decltype(FunctionTable::move),
-                                decltype(&T::move),
-                                &T::move>,
-             FunctionTypeStruct<decltype(FunctionTable::jump),
-                                decltype(&T::jump),
-                                &T::jump>>(p);
+        _init<T,
+              FunctionTypeStruct<decltype(FunctionTable::move),
+                                 decltype(&T::move),
+                                 &T::move>,
+              FunctionTypeStruct<decltype(FunctionTable::jump),
+                                 decltype(&T::jump),
+                                 &T::jump>>(p);
         this->p = reinterpret_cast<FunctionMemberDummy *>(p);
     }
 
     void move(int x, int y) {
-        (p->*_ftable->move)(x, y);
+        return (p->*_ftable->move)(x, y);
     }
 
     // Alternative, but trashes ide-help
     template <typename... Args>
     void jump(Args... args) {
-        (p->*_ftable->jump)(args...);
+        return (p->*_ftable->jump)(args...);
     }
 };
