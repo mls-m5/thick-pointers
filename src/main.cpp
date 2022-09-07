@@ -1,5 +1,10 @@
+#include "rawtraitimplementation.h"
 #include "thickpointer.h"
 #include <iostream>
+
+TRAIT(Movable2,                //
+      (move, void, (int, int)) //
+)
 
 class Apa {
 public:
@@ -33,18 +38,31 @@ public:
 int main(int argc, char *argv[]) {
     std::cout << "hello there\n";
 
-    auto apa = Apa{};
-    auto bepa = Bepa{};
+    {
+        auto apa = Apa{};
+        auto bepa = Bepa{};
 
-    auto p = ThickPointer<Movable>{&apa};
+        auto p = ThickPointer<Movable>{&apa};
 
-    p.move(10, 20);
-    p.jump(true);
+        p.move(10, 20);
+        p.jump(true);
 
-    p = &bepa;
+        p = &bepa;
 
-    p.move(20, 30);
-    p.jump(false);
+        p.move(20, 30);
+        p.jump(false);
+    }
+
+    {
+        std::cout << "\nmacro version..." << std::endl;
+        auto apa = Apa{};
+        auto bepa = Bepa{};
+        auto p = ThickPointer<Movable2>(&apa);
+        p.move(10, 20);
+
+        p = &bepa;
+        p.move(10, 30);
+    }
 
     return 0;
 }

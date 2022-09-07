@@ -39,41 +39,40 @@ auto *functionTableInstance() {
     return table;
 }
 
-template <typename... F>
-using FunctionTable = std::tuple<F...>;
+#define TRAIT_FTABLE_FUNCTION(name, ret, args)                                 \
+    ret(FunctionMemberDummy::*name) args;
 
-// TODO: Hide this in some ugly macro... :'(
-struct Movable {
-    struct FunctionTable {
-        void (FunctionMemberDummy::*move)(int, int);
-        void (FunctionMemberDummy::*jump)(bool);
+#define TRAIT_FTABLE(name, f1)                                                 \
+    struct FunctionTable {                                                     \
+        TRAIT_FTABLE_FUNCTION f1                                               \
     };
 
-    FunctionMemberDummy *p = nullptr;
-    FunctionTable *_ftable;
+#define CONSTRUCTOR_FUNCTION(name, ret, args)                                  \
+    FunctionTypeStruct<decltype(FunctionTable::name),                          \
+                       decltype(&T::name),                                     \
+                       &T::name>
 
-    template <typename T>
-    Movable(T *p) {
-        _ftable = functionTableInstance<
-            T,
-            Movable,
-            FunctionTable,
-            FunctionTypeStruct<decltype(FunctionTable::move),
-                               decltype(&T::move),
-                               &T::move>,
-            FunctionTypeStruct<decltype(FunctionTable::jump),
-                               decltype(&T::jump),
-                               &T::jump>>();
-        this->p = reinterpret_cast<FunctionMemberDummy *>(p);
+#define FUNCTION_DEFINITON(name, ret, args)                                    \
+    template <typename... Args>                                                \
+    void name(Args... a) {                                                     \
+        return (p->*_ftable->name)(a...);                                      \
     }
 
-    void move(int x, int y) {
-        return (p->*_ftable->move)(x, y);
-    }
+#define TRAIT_BODY(name, f1)                                                   \
+    FunctionMemberDummy *p = nullptr;                                          \
+    FunctionTable *_ftable = nullptr;                                          \
+    template <typename T>                                                      \
+    name(T *p) {                                                               \
+        _ftable = functionTableInstance<T,                                     \
+                                        name,                                  \
+                                        FunctionTable,                         \
+                                        CONSTRUCTOR_FUNCTION f1>();            \
+        this->p = reinterpret_cast<FunctionMemberDummy *>(p);                  \
+    }                                                                          \
+    FUNCTION_DEFINITON f1
 
-    // Alternative, but trashes ide-help
-    template <typename... Args>
-    void jump(Args... args) {
-        return (p->*_ftable->jump)(args...);
-    }
-};
+#define TRAIT(name, f1)                                                        \
+    struct name {                                                              \
+        TRAIT_FTABLE(name, f1)                                                 \
+        TRAIT_BODY(name, f1)                                                   \
+    };
