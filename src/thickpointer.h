@@ -20,12 +20,6 @@ struct ThickPointer : public Trait {
     template <typename Type>
     ThickPointer(Type *p)
         : Trait{p} {}
-
-    template <typename Type>
-    ThickPointer &operator=(Type *p) {
-        Trait::operator=(p);
-        return *this;
-    }
 };
 
 /// Create a single trait function table per class
@@ -53,7 +47,7 @@ auto *functionTableInstance() {
         return (p->*_ftable->name)(a...);                                      \
     }
 
-#define TRAIT1(name, f1)                                                       \
+#define Trait1(name, f1)                                                       \
     struct name {                                                              \
         struct FunctionTable {                                                 \
             TRAIT_FTABLE_FUNCTION f1;                                          \
@@ -73,7 +67,7 @@ auto *functionTableInstance() {
         TRAIT_FUNCTION_DEFINITION f1                                           \
     };
 
-#define TRAIT2(name, f1, f2)                                                   \
+#define Trait2(name, f1, f2)                                                   \
     struct name {                                                              \
         struct FunctionTable {                                                 \
             TRAIT_FTABLE_FUNCTION f1;                                          \

@@ -3,14 +3,14 @@
 #include <iostream>
 
 // Traits can be defined before or after the class is defined, it does not mater
-TRAIT1(Movable,                 //
+Trait1(Movable,                 //
        (move, void, (int, int)) //
-)
+);
 
-TRAIT2(ComplexMovable,           //
+Trait2(ComplexMovable,           //
        (move, void, (int, int)), //
        (jump, void, (bool))      //
-)
+);
 
 class Apa {
 public:
@@ -34,7 +34,6 @@ public:
     }
 };
 
-// The theory does not work yet...
 int main(int argc, char *argv[]) {
     {
         std::cout << "\nmacro version..." << std::endl;
