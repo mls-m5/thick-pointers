@@ -24,24 +24,38 @@ struct ThickPointerBase {
     void *p;
 };
 
+template <typename F>
+struct FunctionTable {
+    F _move;
+};
+
+template <typename Trait, typename Type, typename F>
+FunctionTable<F> *functionTableInstance() {
+    static FunctionTable<F> instance{
+        reinterpret_cast<decltype(FunctionTable<F>::_move)>(Type::move)};
+    return &instance;
+}
+
 // TODO: Hide this in some ugly macro... :'(
 struct Movable : virtual ThickPointerBase {
-    void (*_move)(void *, int, int);
+    using ft = void (*)(void *, int, int);
+    FunctionTable<ft> *_ftable;
 
     template <typename T>
     Movable(T *p)
-        : _move{reinterpret_cast<decltype(_move)>(T::move)} {
+        : _ftable{functionTableInstance<Movable, T, ft>()} {
         this->p = p;
     }
 
     template <typename T>
     Movable &operator=(T *p) {
-        _move = reinterpret_cast<decltype(_move)>(T::move);
+        _ftable = functionTableInstance<Movable, T, ft>();
+        this->p = p;
         return *this;
     }
 
     void move(int x, int y) {
-        _move(p, x, y);
+        _ftable->_move(p, x, y);
     }
 };
 
@@ -49,7 +63,7 @@ template <typename Trait>
 struct ThickPointer : public Movable {
     template <typename Type>
     ThickPointer(Type *p)
-        : Trait{p} {} // TODO: Statically create only one trait object per type
+        : Trait{p} {}
 
     template <typename Type>
     ThickPointer &operator=(Type *p) {
