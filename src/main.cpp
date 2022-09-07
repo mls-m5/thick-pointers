@@ -2,10 +2,6 @@
 #include "thickpointer.h"
 #include <iostream>
 
-TRAIT(Movable2,                //
-      (move, void, (int, int)) //
-)
-
 class Apa {
 public:
     void move(int x, int y) {
@@ -34,15 +30,29 @@ public:
     }
 };
 
+TRAIT1(Movable,                 //
+       (move, void, (int, int)) //
+)
+
 // The theory does not work yet...
 int main(int argc, char *argv[]) {
-    std::cout << "hello there\n";
+    {
+        std::cout << "\nmacro version..." << std::endl;
+        auto apa = Apa{};
+        auto bepa = Bepa{};
+        auto p = ThickPointer<Movable>(&apa);
+        p.move(10, 20);
+
+        p = &bepa;
+        p.move(10, 30);
+    }
 
     {
+        std::cout << "\nreference implementation...\n";
         auto apa = Apa{};
         auto bepa = Bepa{};
 
-        auto p = ThickPointer<Movable>{&apa};
+        auto p = ThickPointer<RawMovable>{&apa};
 
         p.move(10, 20);
         p.jump(true);
@@ -51,17 +61,6 @@ int main(int argc, char *argv[]) {
 
         p.move(20, 30);
         p.jump(false);
-    }
-
-    {
-        std::cout << "\nmacro version..." << std::endl;
-        auto apa = Apa{};
-        auto bepa = Bepa{};
-        auto p = ThickPointer<Movable2>(&apa);
-        p.move(10, 20);
-
-        p = &bepa;
-        p.move(10, 30);
     }
 
     return 0;

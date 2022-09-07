@@ -3,7 +3,7 @@
 #include "thickpointer.h"
 
 // This is a reference implementation to base macros on
-struct Movable {
+struct RawMovable {
     struct FunctionTable {
         void (FunctionMemberDummy::*move)(int, int);
         void (FunctionMemberDummy::*jump)(bool);
@@ -13,10 +13,10 @@ struct Movable {
     FunctionTable *_ftable = nullptr;
 
     template <typename T>
-    Movable(T *p) {
+    RawMovable(T *p) {
         _ftable = functionTableInstance<
             T,
-            Movable,
+            RawMovable,
             FunctionTable,
             FunctionTypeStruct<decltype(FunctionTable::move),
                                decltype(&T::move),

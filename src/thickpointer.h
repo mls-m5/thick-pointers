@@ -47,7 +47,7 @@ auto *functionTableInstance() {
         TRAIT_FTABLE_FUNCTION f1                                               \
     };
 
-#define CONSTRUCTOR_FUNCTION(name, ret, args)                                  \
+#define CONSTRUCTOR_FUNCTION1(name, ret, args)                                 \
     FunctionTypeStruct<decltype(FunctionTable::name),                          \
                        decltype(&T::name),                                     \
                        &T::name>
@@ -66,12 +66,12 @@ auto *functionTableInstance() {
         _ftable = functionTableInstance<T,                                     \
                                         name,                                  \
                                         FunctionTable,                         \
-                                        CONSTRUCTOR_FUNCTION f1>();            \
+                                        CONSTRUCTOR_FUNCTION1 f1>();           \
         this->p = reinterpret_cast<FunctionMemberDummy *>(p);                  \
     }                                                                          \
     FUNCTION_DEFINITON f1
 
-#define TRAIT(name, f1)                                                        \
+#define TRAIT1(name, f1)                                                       \
     struct name {                                                              \
         TRAIT_FTABLE(name, f1)                                                 \
         TRAIT_BODY(name, f1)                                                   \
