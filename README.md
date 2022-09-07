@@ -46,7 +46,7 @@ Trait2(Movable,                  //
 The comment markers at the end of the line is to force clang-format to do line
 breaks.
 
-After that define one or more classes that uses your functions:
+After that define one or more classes that implements your functions:
 
 ```c++
 class Apa {
@@ -68,6 +68,8 @@ public:
 };
 ```
 
+Notice how none of these functions are `virtual`.
+
 Then start using the traits. Notice how you do not need to define that the trait
 `Movable` and the classes `Apa` and `Bepa` relates to each other. This is done
 with templating, kind of similar to how Golang does.
@@ -78,7 +80,7 @@ int main(int argc, char *argv[]) {
     auto apa = Apa{};
     auto bepa = Bepa{};
     
-    auto p = ThickPointer<Movable>(&apa);
+    auto p = Movable(&apa);
     p.move(10, 20);
     p.jump(true);
 

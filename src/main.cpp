@@ -1,5 +1,4 @@
 #include "rawtraitimplementation.h"
-#include "thickpointer.h"
 #include "trait.h"
 #include <iostream>
 
@@ -40,7 +39,7 @@ int main(int argc, char *argv[]) {
         std::cout << "\nmacro version..." << std::endl;
         auto apa = Apa{};
         auto bepa = Bepa{};
-        auto p = ThickPointer<Movable>(&apa);
+        auto p = Movable{&apa};
         p.move(10, 20);
 
         p = &bepa;
@@ -51,7 +50,7 @@ int main(int argc, char *argv[]) {
         std::cout << "\nmacro version 2..." << std::endl;
         auto apa = Apa{};
         auto bepa = Bepa{};
-        auto p = ThickPointer<ComplexMovable>(&apa);
+        auto p = ComplexMovable{&apa};
         p.move(10, 20);
         p.jump(true);
 
@@ -65,7 +64,7 @@ int main(int argc, char *argv[]) {
         auto apa = Apa{};
         auto bepa = Bepa{};
 
-        auto p = ThickPointer<RawMovable>{&apa};
+        auto p = RawMovable{&apa};
 
         p.move(10, 20);
         p.jump(true);
