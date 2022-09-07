@@ -6,9 +6,6 @@ struct FunctionMemberDummy {
     // to member functions to other types
 };
 
-template <typename... F>
-using FunctionTable = std::tuple<F...>;
-
 // Used to send template parameters in larger packs
 template <typename DummyType, typename FunctionType, FunctionType FunctionValue>
 struct FunctionTypeStruct {
@@ -17,10 +14,13 @@ struct FunctionTypeStruct {
     constexpr static inline FunctionType FP = FunctionValue;
 };
 
-template <typename Trait, typename Type, typename... FuncS>
-FunctionTable<typename FuncS::FT...> *functionTableInstance() {
-    static auto instance = FunctionTable<typename FuncS::FT...>{
-        reinterpret_cast<typename FuncS::FT>(FuncS::FP)...};
+template <typename FunctionTable,
+          typename Trait,
+          typename Type,
+          typename... FuncS>
+auto *functionTableInstance() {
+    static auto instance =
+        FunctionTable{reinterpret_cast<typename FuncS::FT>(FuncS::FP)...};
     return &instance;
 }
 
@@ -37,17 +37,24 @@ struct ThickPointer : public Trait {
     }
 };
 
+template <typename... F>
+using FunctionTable = std::tuple<F...>;
+
 // TODO: Hide this in some ugly macro... :'(
 struct Movable {
     using moveFT = void (FunctionMemberDummy::*)(int, int);
     using jumpFT = void (FunctionMemberDummy::*)(bool);
 
     FunctionMemberDummy *p = nullptr;
-    FunctionTable<moveFT, jumpFT> *_ftable;
+
+    using FunctionTableT =
+
+        FunctionTable<moveFT, jumpFT>;
+    FunctionTableT *_ftable;
 
     template <typename T, typename Trait, typename... FuncS>
     void init(T *p) {
-        _ftable = functionTableInstance<Trait, T, FuncS...>();
+        _ftable = functionTableInstance<FunctionTableT, Trait, T, FuncS...>();
     }
 
     template <typename T>
