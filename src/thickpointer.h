@@ -9,16 +9,21 @@ struct FunctionMemberDummy {
 template <typename... F>
 using FunctionTable = std::tuple<F...>;
 
-template <typename Trait, typename Type, typename FT, typename OFT, OFT FP>
-FunctionTable<FT> *functionTableInstance() {
-    static FunctionTable<FT> instance =
-        FunctionTable<FT>{reinterpret_cast<FT>(FP)};
+// Used to send template parameters in larger packs
+template <typename DummyType, typename FunctionType, FunctionType FunctionValue>
+struct FunctionTypeStruct {
+    using FT = DummyType;     // Used to store pointer
+    using OFT = FunctionType; // The actual pointer type
+    constexpr static inline FunctionType FP = FunctionValue;
+};
+
+template <typename Trait, typename Type, typename... FuncS>
+FunctionTable<typename FuncS::FT...> *functionTableInstance() {
+    static FunctionTable<typename FuncS::FT...> instance =
+        FunctionTable<typename FuncS::FT...>{
+            (reinterpret_cast<typename FuncS::FT>(FuncS::FP), ...)};
     return &instance;
 }
-
-struct ThickPointerBase {
-    FunctionMemberDummy *p;
-};
 
 template <typename Trait>
 struct ThickPointer : public Trait {
@@ -34,24 +39,27 @@ struct ThickPointer : public Trait {
 };
 
 template <typename... F>
-struct TraitImpl : virtual ThickPointerBase {
+struct TraitImpl {
     FunctionTable<F...> *_ftable;
 
-    template <typename T, typename Trait, typename FT, typename OFT, OFT FP>
+    template <typename T, typename Trait, typename... FuncS>
     void init(T *p) {
-        _ftable = functionTableInstance<Trait, T, FT, OFT, FP>();
-        this->p = reinterpret_cast<FunctionMemberDummy *>(p);
+        _ftable = functionTableInstance<Trait, T, FuncS...>();
     }
 };
 
 // TODO: Hide this in some ugly macro... :'(
-struct Movable : public virtual ThickPointerBase {
+struct Movable {
     using moveFT = void (FunctionMemberDummy::*)(int, int);
+
     TraitImpl<moveFT> _impl;
+    FunctionMemberDummy *p = nullptr;
 
     template <typename T>
     Movable(T *p) {
-        _impl.init<T, Movable, moveFT, decltype(&T::move), &T::move>(p);
+        _impl.init<T,
+                   Movable,
+                   FunctionTypeStruct<moveFT, decltype(&T::move), &T::move>>(p);
         this->p = reinterpret_cast<FunctionMemberDummy *>(p);
     }
 
