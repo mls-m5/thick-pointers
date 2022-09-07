@@ -42,37 +42,55 @@ auto *functionTableInstance() {
 #define TRAIT_FTABLE_FUNCTION(name, ret, args)                                 \
     ret(FunctionMemberDummy::*name) args;
 
-#define TRAIT_FTABLE(name, f1)                                                 \
-    struct FunctionTable {                                                     \
-        TRAIT_FTABLE_FUNCTION f1                                               \
-    };
-
-#define CONSTRUCTOR_FUNCTION1(name, ret, args)                                 \
+#define TRAIT_CONSTRUCTOR_FUNCTION(name, ret, args)                            \
     FunctionTypeStruct<decltype(FunctionTable::name),                          \
                        decltype(&T::name),                                     \
                        &T::name>
 
-#define FUNCTION_DEFINITON(name, ret, args)                                    \
+#define TRAIT_FUNCTION_DEFINITION(name, ret, args)                             \
     template <typename... Args>                                                \
     void name(Args... a) {                                                     \
         return (p->*_ftable->name)(a...);                                      \
     }
 
-#define TRAIT_BODY(name, f1)                                                   \
-    FunctionMemberDummy *p = nullptr;                                          \
-    FunctionTable *_ftable = nullptr;                                          \
-    template <typename T>                                                      \
-    name(T *p) {                                                               \
-        _ftable = functionTableInstance<T,                                     \
-                                        name,                                  \
-                                        FunctionTable,                         \
-                                        CONSTRUCTOR_FUNCTION1 f1>();           \
-        this->p = reinterpret_cast<FunctionMemberDummy *>(p);                  \
-    }                                                                          \
-    FUNCTION_DEFINITON f1
-
 #define TRAIT1(name, f1)                                                       \
     struct name {                                                              \
-        TRAIT_FTABLE(name, f1)                                                 \
-        TRAIT_BODY(name, f1)                                                   \
+        struct FunctionTable {                                                 \
+            TRAIT_FTABLE_FUNCTION f1;                                          \
+        };                                                                     \
+        FunctionMemberDummy *p = nullptr;                                      \
+        FunctionTable *_ftable = nullptr;                                      \
+                                                                               \
+        template <typename T>                                                  \
+        name(T *p) {                                                           \
+            _ftable = functionTableInstance<T,                                 \
+                                            name,                              \
+                                            FunctionTable,                     \
+                                            TRAIT_CONSTRUCTOR_FUNCTION f1>();  \
+            this->p = reinterpret_cast<FunctionMemberDummy *>(p);              \
+        }                                                                      \
+                                                                               \
+        TRAIT_FUNCTION_DEFINITION f1                                           \
+    };
+
+#define TRAIT2(name, f1, f2)                                                   \
+    struct name {                                                              \
+        struct FunctionTable {                                                 \
+            TRAIT_FTABLE_FUNCTION f1;                                          \
+            TRAIT_FTABLE_FUNCTION f2                                           \
+        };                                                                     \
+        FunctionMemberDummy *p = nullptr;                                      \
+        FunctionTable *_ftable = nullptr;                                      \
+                                                                               \
+        template <typename T>                                                  \
+        name(T *p) {                                                           \
+            _ftable = functionTableInstance<T,                                 \
+                                            name,                              \
+                                            FunctionTable,                     \
+                                            TRAIT_CONSTRUCTOR_FUNCTION f1,     \
+                                            TRAIT_CONSTRUCTOR_FUNCTION f2>();  \
+            this->p = reinterpret_cast<FunctionMemberDummy *>(p);              \
+        }                                                                      \
+                                                                               \
+        TRAIT_FUNCTION_DEFINITION f1 TRAIT_FUNCTION_DEFINITION f2              \
     };

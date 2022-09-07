@@ -2,37 +2,37 @@
 #include "thickpointer.h"
 #include <iostream>
 
+// Traits can be defined before or after the class is defined, it does not mater
+TRAIT1(Movable,                 //
+       (move, void, (int, int)) //
+)
+
+TRAIT2(ComplexMovable,           //
+       (move, void, (int, int)), //
+       (jump, void, (bool))      //
+)
+
 class Apa {
 public:
     void move(int x, int y) {
-        x = x;
-        y = y;
-        std::cout << "moving apa " << x << ", " << y << std::endl;
+        std::cout << "apa moves " << x << ", " << y << std::endl;
     };
 
     void jump(bool x) {
         std::cout << "apa jumps" << std::endl;
     }
-
-private:
-    int x = 0;
-    int y = 0;
 };
 
 class Bepa {
 public:
     void move(int x, int y) {
-        std::cout << "moving bepa " << x << ", " << y << std::endl;
+        std::cout << "bepa moves " << x << ", " << y << std::endl;
     };
 
     void jump(bool x) {
         std::cout << "bepa jumps" << std::endl;
     }
 };
-
-TRAIT1(Movable,                 //
-       (move, void, (int, int)) //
-)
 
 // The theory does not work yet...
 int main(int argc, char *argv[]) {
@@ -45,6 +45,19 @@ int main(int argc, char *argv[]) {
 
         p = &bepa;
         p.move(10, 30);
+    }
+
+    {
+        std::cout << "\nmacro version 2..." << std::endl;
+        auto apa = Apa{};
+        auto bepa = Bepa{};
+        auto p = ThickPointer<ComplexMovable>(&apa);
+        p.move(10, 20);
+        p.jump(true);
+
+        p = &bepa;
+        p.move(10, 30);
+        p.jump(false);
     }
 
     {
