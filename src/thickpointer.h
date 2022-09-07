@@ -14,16 +14,6 @@ struct FunctionTypeStruct {
     constexpr static inline FunctionType FP = FunctionValue;
 };
 
-// template <typename FunctionTable,
-//           typename Trait,
-//           typename Type,
-//           typename... FuncS>
-// auto *functionTableInstance() {
-//     static auto instance =
-//         FunctionTable{reinterpret_cast<typename FuncS::FT>(FuncS::FP)...};
-//     return &instance;
-// }
-
 template <typename Trait>
 struct ThickPointer : public Trait {
     template <typename Type>
@@ -38,10 +28,13 @@ struct ThickPointer : public Trait {
 };
 
 template <typename Type, typename Trait, typename Table, typename... FuncS>
-auto *ftStructInstance() {
-    //    static auto table = Table{
-    //        reinterpret_cast<typename FuncS::FT>(FuncS::FP)...};
-    return new Table{reinterpret_cast<typename FuncS::FT>(FuncS::FP)...};
+auto *functionTableInstance() {
+    // I would prefere to not create this on the heap, but the compiler throws
+    // mysterious type conversion error when not so I give up
+    static auto table =
+        new Table{reinterpret_cast<typename FuncS::FT>(FuncS::FP)...};
+
+    return table;
 }
 
 template <typename... F>
@@ -49,42 +42,39 @@ using FunctionTable = std::tuple<F...>;
 
 // TODO: Hide this in some ugly macro... :'(
 struct Movable {
-    using moveFT = void (FunctionMemberDummy::*)(int, int);
-    using jumpFT = void (FunctionMemberDummy::*)(bool);
-
-    struct FTStruct {
+    struct FunctionTable {
         void (FunctionMemberDummy::*move)(int, int);
         void (FunctionMemberDummy::*jump)(bool);
     };
 
     FunctionMemberDummy *p = nullptr;
 
-    //    using FunctionTableT = FunctionTable<moveFT, jumpFT>;
-    FTStruct *_ftable;
+    FunctionTable *_ftable;
 
-    template <typename T, typename Trait, typename... FuncS>
+    template <typename T, typename... FuncS>
     void init(T *p) {
-        _ftable =
-            new FTStruct{reinterpret_cast<typename FuncS::FT>(FuncS::FP)...};
-        _ftable = ftStructInstance<T, Trait, FTStruct, FuncS...>();
+        _ftable = functionTableInstance<T, Movable, FunctionTable, FuncS...>();
     }
 
     template <typename T>
     Movable(T *p) {
         init<T,
-             Movable,
-             FunctionTypeStruct<moveFT, decltype(&T::move), &T::move>,
-             FunctionTypeStruct<jumpFT, decltype(&T::jump), &T::jump>>(p);
+             FunctionTypeStruct<decltype(FunctionTable::move),
+                                decltype(&T::move),
+                                &T::move>,
+             FunctionTypeStruct<decltype(FunctionTable::jump),
+                                decltype(&T::jump),
+                                &T::jump>>(p);
         this->p = reinterpret_cast<FunctionMemberDummy *>(p);
     }
 
     void move(int x, int y) {
-        auto f = _ftable->move;
-        (p->*f)(x, y);
+        (p->*_ftable->move)(x, y);
     }
 
-    void jump(bool x) {
-        auto f = _ftable->jump;
-        (p->*f)(x);
+    // Alternative, but trashes ide-help
+    template <typename... Args>
+    void jump(Args... args) {
+        (p->*_ftable->jump)(args...);
     }
 };
