@@ -1,6 +1,6 @@
 #pragma once
 
-#include "thickpointer.h"
+#include "trait.h"
 
 // This is a reference implementation to base macros on
 struct RawMovable {

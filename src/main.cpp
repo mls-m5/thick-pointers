@@ -1,5 +1,6 @@
 #include "rawtraitimplementation.h"
 #include "thickpointer.h"
+#include "trait.h"
 #include <iostream>
 
 // Traits can be defined before or after the class is defined, it does not mater
