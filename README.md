@@ -99,6 +99,17 @@ bepa moves 10, 30
 bepa jumps
 ```
 
+You could also send the pointer to functions if you want to do some usable
+dynamic dispatching with them. The size of each pointer only double of
+that of a raw c++ pointer.
+
+```c++
+void useMovable(Movable m) {
+    m.move(1, 2);
+    ...
+}
+```
+
 ## Non-goals
 
 Only dynamic dispatch is considered at this time, and not memory management.
