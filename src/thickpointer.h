@@ -14,15 +14,15 @@ struct FunctionTypeStruct {
     constexpr static inline FunctionType FP = FunctionValue;
 };
 
-template <typename FunctionTable,
-          typename Trait,
-          typename Type,
-          typename... FuncS>
-auto *functionTableInstance() {
-    static auto instance =
-        FunctionTable{reinterpret_cast<typename FuncS::FT>(FuncS::FP)...};
-    return &instance;
-}
+// template <typename FunctionTable,
+//           typename Trait,
+//           typename Type,
+//           typename... FuncS>
+// auto *functionTableInstance() {
+//     static auto instance =
+//         FunctionTable{reinterpret_cast<typename FuncS::FT>(FuncS::FP)...};
+//     return &instance;
+// }
 
 template <typename Trait>
 struct ThickPointer : public Trait {
@@ -37,6 +37,13 @@ struct ThickPointer : public Trait {
     }
 };
 
+template <typename Type, typename Trait, typename Table, typename... FuncS>
+auto *ftStructInstance() {
+    //    static auto table = Table{
+    //        reinterpret_cast<typename FuncS::FT>(FuncS::FP)...};
+    return new Table{reinterpret_cast<typename FuncS::FT>(FuncS::FP)...};
+}
+
 template <typename... F>
 using FunctionTable = std::tuple<F...>;
 
@@ -45,16 +52,21 @@ struct Movable {
     using moveFT = void (FunctionMemberDummy::*)(int, int);
     using jumpFT = void (FunctionMemberDummy::*)(bool);
 
+    struct FTStruct {
+        void (FunctionMemberDummy::*move)(int, int);
+        void (FunctionMemberDummy::*jump)(bool);
+    };
+
     FunctionMemberDummy *p = nullptr;
 
-    using FunctionTableT =
-
-        FunctionTable<moveFT, jumpFT>;
-    FunctionTableT *_ftable;
+    //    using FunctionTableT = FunctionTable<moveFT, jumpFT>;
+    FTStruct *_ftable;
 
     template <typename T, typename Trait, typename... FuncS>
     void init(T *p) {
-        _ftable = functionTableInstance<FunctionTableT, Trait, T, FuncS...>();
+        _ftable =
+            new FTStruct{reinterpret_cast<typename FuncS::FT>(FuncS::FP)...};
+        _ftable = ftStructInstance<T, Trait, FTStruct, FuncS...>();
     }
 
     template <typename T>
@@ -67,12 +79,12 @@ struct Movable {
     }
 
     void move(int x, int y) {
-        auto f = std::get<0>(*_ftable);
+        auto f = _ftable->move;
         (p->*f)(x, y);
     }
 
     void jump(bool x) {
-        auto f = std::get<1>(*_ftable);
+        auto f = _ftable->jump;
         (p->*f)(x);
     }
 };
