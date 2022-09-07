@@ -37,40 +37,35 @@ struct ThickPointer : public Trait {
     }
 };
 
-template <typename... F>
-struct TraitImpl {
-    FunctionTable<F...> *_ftable;
-
-    template <typename T, typename Trait, typename... FuncS>
-    void init(T *p) {
-        _ftable = functionTableInstance<Trait, T, FuncS...>();
-    }
-};
-
 // TODO: Hide this in some ugly macro... :'(
 struct Movable {
     using moveFT = void (FunctionMemberDummy::*)(int, int);
     using jumpFT = void (FunctionMemberDummy::*)(bool);
 
-    TraitImpl<moveFT, jumpFT> _impl;
     FunctionMemberDummy *p = nullptr;
+    FunctionTable<moveFT, jumpFT> *_ftable;
+
+    template <typename T, typename Trait, typename... FuncS>
+    void init(T *p) {
+        _ftable = functionTableInstance<Trait, T, FuncS...>();
+    }
 
     template <typename T>
     Movable(T *p) {
-        _impl.init<T,
-                   Movable,
-                   FunctionTypeStruct<moveFT, decltype(&T::move), &T::move>,
-                   FunctionTypeStruct<jumpFT, decltype(&T::jump), &T::jump>>(p);
+        init<T,
+             Movable,
+             FunctionTypeStruct<moveFT, decltype(&T::move), &T::move>,
+             FunctionTypeStruct<jumpFT, decltype(&T::jump), &T::jump>>(p);
         this->p = reinterpret_cast<FunctionMemberDummy *>(p);
     }
 
     void move(int x, int y) {
-        auto f = std::get<0>(*_impl._ftable);
+        auto f = std::get<0>(*_ftable);
         (p->*f)(x, y);
     }
 
     void jump(bool x) {
-        auto f = std::get<1>(*_impl._ftable);
+        auto f = std::get<1>(*_ftable);
         (p->*f)(x);
     }
 };
