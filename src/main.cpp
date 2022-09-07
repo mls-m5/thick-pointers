@@ -1,10 +1,11 @@
+#include "thickpointer.h"
 #include <iostream>
 
 class Apa {
 public:
-    static void move(Apa *self, int x, int y) {
-        self->x = x;
-        self->y = y;
+    void move(int x, int y) {
+        x = x;
+        y = y;
         std::cout << "moving apa " << x << ", " << y << std::endl;
     };
 
@@ -15,61 +16,9 @@ private:
 
 class Bepa {
 public:
-    static void move(Apa *self, int x, int y) {
+    void move(int x, int y) {
         std::cout << "moving bepa " << x << ", " << y << std::endl;
     };
-};
-
-struct ThickPointerBase {
-    void *p;
-};
-
-template <typename F>
-struct FunctionTable {
-    F _move;
-};
-
-template <typename Trait, typename Type, typename F>
-FunctionTable<F> *functionTableInstance() {
-    static FunctionTable<F> instance{
-        reinterpret_cast<decltype(FunctionTable<F>::_move)>(Type::move)};
-    return &instance;
-}
-
-// TODO: Hide this in some ugly macro... :'(
-struct Movable : virtual ThickPointerBase {
-    using ft = void (*)(void *, int, int);
-    FunctionTable<ft> *_ftable;
-
-    template <typename T>
-    Movable(T *p)
-        : _ftable{functionTableInstance<Movable, T, ft>()} {
-        this->p = p;
-    }
-
-    template <typename T>
-    Movable &operator=(T *p) {
-        _ftable = functionTableInstance<Movable, T, ft>();
-        this->p = p;
-        return *this;
-    }
-
-    void move(int x, int y) {
-        _ftable->_move(p, x, y);
-    }
-};
-
-template <typename Trait>
-struct ThickPointer : public Movable {
-    template <typename Type>
-    ThickPointer(Type *p)
-        : Trait{p} {}
-
-    template <typename Type>
-    ThickPointer &operator=(Type *p) {
-        Trait::operator=(p);
-        return *this;
-    }
 };
 
 // The theory does not work yet...
