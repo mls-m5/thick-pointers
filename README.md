@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
     auto apa = Apa{};
     auto bepa = Bepa{};
     
-    auto p = Movable(&apa);
+    auto p = Movable{&apa};
     p.move(10, 20);
     p.jump(true);
 
