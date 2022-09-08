@@ -34,6 +34,12 @@ public:
     }
 };
 
+void useMovable(ComplexMovable &m) {
+    std::cout << "in function useMovable" << std::endl;
+    m.move(10, 40);
+    m.jump(true);
+}
+
 int main(int argc, char *argv[]) {
     {
         std::cout << "\nmacro version..." << std::endl;
@@ -57,6 +63,8 @@ int main(int argc, char *argv[]) {
         p = &bepa;
         p.move(10, 30);
         p.jump(false);
+
+        useMovable(p);
     }
 
     {
