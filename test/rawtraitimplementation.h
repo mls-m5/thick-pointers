@@ -31,7 +31,7 @@ struct RawMovable {
         return (p->*_ftable->move)(x, y);
     }
 
-    // Alternative, but trashes ide-help, but works
+    // Alternative... trashes ide-help, but works
     template <typename... Args>
     void jump(Args... args) {
         return (p->*_ftable->jump)(args...);
