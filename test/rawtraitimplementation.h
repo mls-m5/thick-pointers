@@ -6,7 +6,7 @@
 class RawMovable {
     struct FunctionTable {
         void (tpimpl::FunctionMemberDummy::*move)(int, int);
-        void (tpimpl::FunctionMemberDummy::*jump)(bool);
+        float (tpimpl::FunctionMemberDummy::*jump)(bool);
     };
 
     tpimpl::FunctionMemberDummy *_p = nullptr;
@@ -28,13 +28,13 @@ public:
         this->_p = reinterpret_cast<tpimpl::FunctionMemberDummy *>(_p);
     }
 
-    void move(int x, int y) {
+    auto move(int x, int y) {
         return (_p->*_ftable->move)(x, y);
     }
 
     // Alternative... trashes ide-help, but works
     template <typename... Args>
-    void jump(Args... args) {
+    auto jump(Args... args) {
         return (_p->*_ftable->jump)(args...);
     }
 };

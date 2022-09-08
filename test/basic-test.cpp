@@ -10,7 +10,7 @@ Trait1(Movable,                 //
 
 Trait2(ComplexMovable,           //
        (move, void, (int, int)), //
-       (jump, void, (bool))      //
+       (jump, float, (bool))     //
 );
 
 class Apa {
@@ -19,8 +19,10 @@ public:
         std::cout << "apa moves " << x << ", " << y << std::endl;
     };
 
-    void jump(bool x) {
-        std::cout << "apa jumps" << std::endl;
+    float jump(bool height) {
+        float h = 1 + 2 * height;
+        std::cout << "apa jumps " << h << std::endl;
+        return h;
     }
 };
 
@@ -30,8 +32,10 @@ public:
         std::cout << "bepa moves " << x << ", " << y << std::endl;
     };
 
-    void jump(bool x) {
-        std::cout << "bepa jumps" << std::endl;
+    float jump(bool height) {
+        float h = 3 + 4 * height;
+        std::cout << "bepa jumps " << h << std::endl;
+        return h;
     }
 };
 
@@ -59,7 +63,8 @@ int main(int argc, char *argv[]) {
         auto bepa = Bepa{};
         auto p = ComplexMovable{&apa};
         p.move(10, 20);
-        p.jump(true);
+        auto h = p.jump(true);
+        std::cout << "returned value " << h << std::endl;
 
         p = &bepa;
         p.move(10, 30);
@@ -82,6 +87,8 @@ int main(int argc, char *argv[]) {
 
         p.move(20, 30);
         p.jump(false);
+        auto h = p.jump(true);
+        std::cout << "returned value " << h << std::endl;
     }
 
     return 0;

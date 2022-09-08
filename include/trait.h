@@ -36,7 +36,7 @@ struct FunctionTableInstance {
 
 #define TRAIT_FUNCTION_DEFINITION(name, ret, args)                             \
     template <typename... Args>                                                \
-    void name(Args... a) {                                                     \
+    auto name(Args... a) {                                                     \
         return (_p->*_ftable->name)(a...);                                     \
     }
 
