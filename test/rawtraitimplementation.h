@@ -9,7 +9,7 @@ class RawMovable {
         void (tpimpl::FunctionMemberDummy::*jump)(bool);
     };
 
-    tpimpl::FunctionMemberDummy *p = nullptr;
+    tpimpl::FunctionMemberDummy *_p = nullptr;
     const FunctionTable *_ftable = nullptr;
 
 public:
@@ -25,16 +25,16 @@ public:
             tpimpl::FunctionTypeStruct<decltype(FunctionTable::jump),
                                        decltype(&T::jump),
                                        &T::jump>>::table;
-        this->p = reinterpret_cast<tpimpl::FunctionMemberDummy *>(p);
+        this->_p = reinterpret_cast<tpimpl::FunctionMemberDummy *>(_p);
     }
 
     void move(int x, int y) {
-        return (p->*_ftable->move)(x, y);
+        return (_p->*_ftable->move)(x, y);
     }
 
     // Alternative... trashes ide-help, but works
     template <typename... Args>
     void jump(Args... args) {
-        return (p->*_ftable->jump)(args...);
+        return (_p->*_ftable->jump)(args...);
     }
 };

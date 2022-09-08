@@ -2,7 +2,8 @@
 #include "trait.h"
 #include <iostream>
 
-// Traits can be defined before or after the class is defined, it does not mater
+// Traits can be defined before or after the class is defined, it does not
+// matter
 Trait1(Movable,                 //
        (move, void, (int, int)) //
 );

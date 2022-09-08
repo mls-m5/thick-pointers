@@ -37,7 +37,7 @@ struct FunctionTableInstance {
 #define TRAIT_FUNCTION_DEFINITION(name, ret, args)                             \
     template <typename... Args>                                                \
     void name(Args... a) {                                                     \
-        return (p->*_ftable->name)(a...);                                      \
+        return (_p->*_ftable->name)(a...);                                     \
     }
 
 #define Trait1(name, f1)                                                       \
@@ -45,18 +45,18 @@ struct FunctionTableInstance {
         struct FunctionTable {                                                 \
             TRAIT_FTABLE_FUNCTION f1;                                          \
         };                                                                     \
-        tpimpl::FunctionMemberDummy *p = nullptr;                              \
+        tpimpl::FunctionMemberDummy *_p = nullptr;                             \
         const FunctionTable *_ftable = nullptr;                                \
                                                                                \
     public:                                                                    \
         template <typename T>                                                  \
-        name(T *p) {                                                           \
+        name(T *_p) {                                                          \
             _ftable = tpimpl::FunctionTableInstance<                           \
                 T,                                                             \
                 name,                                                          \
                 FunctionTable,                                                 \
                 TRAIT_CONSTRUCTOR_FUNCTION f1>::table;                         \
-            this->p = reinterpret_cast<tpimpl::FunctionMemberDummy *>(p);      \
+            this->_p = reinterpret_cast<tpimpl::FunctionMemberDummy *>(_p);    \
         }                                                                      \
                                                                                \
         TRAIT_FUNCTION_DEFINITION f1                                           \
@@ -68,19 +68,19 @@ struct FunctionTableInstance {
             TRAIT_FTABLE_FUNCTION f1;                                          \
             TRAIT_FTABLE_FUNCTION f2                                           \
         };                                                                     \
-        tpimpl::FunctionMemberDummy *p = nullptr;                              \
+        tpimpl::FunctionMemberDummy *_p = nullptr;                             \
         const FunctionTable *_ftable = nullptr;                                \
                                                                                \
     public:                                                                    \
         template <typename T>                                                  \
-        name(T *p) {                                                           \
+        name(T *_p) {                                                          \
             _ftable = tpimpl::FunctionTableInstance<                           \
                 T,                                                             \
                 name,                                                          \
                 FunctionTable,                                                 \
                 TRAIT_CONSTRUCTOR_FUNCTION f1,                                 \
                 TRAIT_CONSTRUCTOR_FUNCTION f2>::table;                         \
-            this->p = reinterpret_cast<tpimpl::FunctionMemberDummy *>(p);      \
+            this->_p = reinterpret_cast<tpimpl::FunctionMemberDummy *>(_p);    \
         }                                                                      \
                                                                                \
         TRAIT_FUNCTION_DEFINITION f1 TRAIT_FUNCTION_DEFINITION f2              \
