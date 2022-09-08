@@ -2,20 +2,31 @@
 cmake_minimum_required(VERSION 3.23)
 project(thick-pointers)
 
-add_executable(
+add_library(
     thick-pointers
-    src/main.cpp
+    INTERFACE
     )
+
 
 target_compile_features(
     thick-pointers
-    PRIVATE
+    INTERFACE
     cxx_std_17
     )
 
-find_package(Threads)
-target_link_libraries(
+target_include_directories(
     thick-pointers
-    PRIVATE
-    ${CMAKE_THREAD_LIBS_INIT}
+    INTERFACE
+    include
+    )
+
+
+add_executable(
+    thick-pointers-test1
+    test/test1.cpp
+    )
+
+target_link_libraries(
+    thick-pointers-test1
+    thick-pointers
     )
