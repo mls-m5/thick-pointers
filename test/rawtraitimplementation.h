@@ -28,6 +28,8 @@ public:
         this->_p = reinterpret_cast<tpimpl::FunctionMemberDummy *>(_p);
     }
 
+    RawMovable() = default;
+
     auto move(int x, int y) {
         return (_p->*_ftable->move)(x, y);
     }

@@ -49,6 +49,8 @@ struct FunctionTableInstance {
         const FunctionTable *_ftable = nullptr;                                \
                                                                                \
     public:                                                                    \
+        name() = default;                                                      \
+                                                                               \
         template <typename T>                                                  \
         name(T *_p) {                                                          \
             _ftable = tpimpl::FunctionTableInstance<                           \
@@ -72,6 +74,8 @@ struct FunctionTableInstance {
         const FunctionTable *_ftable = nullptr;                                \
                                                                                \
     public:                                                                    \
+        name() = default;                                                      \
+                                                                               \
         template <typename T>                                                  \
         name(T *_p) {                                                          \
             _ftable = tpimpl::FunctionTableInstance<                           \

@@ -38,4 +38,4 @@ function(test testname)
 endfunction()
 
 test(basic)
-test(performance)
+test(constructor)
