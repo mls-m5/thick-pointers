@@ -3,18 +3,19 @@
 #include "trait.h"
 
 // This is a reference implementation to base macros on
-struct RawMovable {
+class RawMovable {
     struct FunctionTable {
         void (tpimpl::FunctionMemberDummy::*move)(int, int);
         void (tpimpl::FunctionMemberDummy::*jump)(bool);
     };
 
     tpimpl::FunctionMemberDummy *p = nullptr;
-    FunctionTable *_ftable = nullptr;
+    const FunctionTable *_ftable = nullptr;
 
+public:
     template <typename T>
     RawMovable(T *p) {
-        _ftable = tpimpl::functionTableInstance<
+        _ftable = tpimpl::FunctionTableInstance<
             T,
             RawMovable,
             FunctionTable,
@@ -23,7 +24,7 @@ struct RawMovable {
                                        &T::move>,
             tpimpl::FunctionTypeStruct<decltype(FunctionTable::jump),
                                        decltype(&T::jump),
-                                       &T::jump>>();
+                                       &T::jump>>::table;
         this->p = reinterpret_cast<tpimpl::FunctionMemberDummy *>(p);
     }
 
