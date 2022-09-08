@@ -21,12 +21,21 @@ target_include_directories(
     )
 
 
-add_executable(
-    thick-pointers-test1
-    test/test1.cpp
-    )
+function(test testname)
+    add_executable(
+        ${testname}-test
+        test/${testname}-test.cpp
+        )
 
-target_link_libraries(
-    thick-pointers-test1
-    thick-pointers
-    )
+    target_link_libraries(
+        ${testname}-test
+        thick-pointers
+        )
+
+    add_test(NAME ${testname}-test
+        COMMAND ${testname}-test
+        )
+endfunction()
+
+test(basic)
+test(performance)
