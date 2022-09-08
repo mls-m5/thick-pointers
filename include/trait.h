@@ -1,5 +1,7 @@
 #pragma once
 
+namespace tpimpl {
+
 struct FunctionMemberDummy {
     // The only reason for this struct is because c++ refuses to cast pointers
     // to member functions to other types
@@ -24,13 +26,15 @@ auto *functionTableInstance() {
     return table;
 }
 
+} // namespace tpimpl
+
 #define TRAIT_FTABLE_FUNCTION(name, ret, args)                                 \
-    ret(FunctionMemberDummy::*name) args;
+    ret(tpimpl::FunctionMemberDummy::*name) args;
 
 #define TRAIT_CONSTRUCTOR_FUNCTION(name, ret, args)                            \
-    FunctionTypeStruct<decltype(FunctionTable::name),                          \
-                       decltype(&T::name),                                     \
-                       &T::name>
+    tpimpl::FunctionTypeStruct<decltype(FunctionTable::name),                  \
+                               decltype(&T::name),                             \
+                               &T::name>
 
 #define TRAIT_FUNCTION_DEFINITION(name, ret, args)                             \
     template <typename... Args>                                                \
@@ -43,16 +47,17 @@ auto *functionTableInstance() {
         struct FunctionTable {                                                 \
             TRAIT_FTABLE_FUNCTION f1;                                          \
         };                                                                     \
-        FunctionMemberDummy *p = nullptr;                                      \
+        tpimpl::FunctionMemberDummy *p = nullptr;                              \
         FunctionTable *_ftable = nullptr;                                      \
                                                                                \
         template <typename T>                                                  \
         name(T *p) {                                                           \
-            _ftable = functionTableInstance<T,                                 \
-                                            name,                              \
-                                            FunctionTable,                     \
-                                            TRAIT_CONSTRUCTOR_FUNCTION f1>();  \
-            this->p = reinterpret_cast<FunctionMemberDummy *>(p);              \
+            _ftable = tpimpl::functionTableInstance<                           \
+                T,                                                             \
+                name,                                                          \
+                FunctionTable,                                                 \
+                TRAIT_CONSTRUCTOR_FUNCTION f1>();                              \
+            this->p = reinterpret_cast<tpimpl::FunctionMemberDummy *>(p);      \
         }                                                                      \
                                                                                \
         TRAIT_FUNCTION_DEFINITION f1                                           \
@@ -64,17 +69,18 @@ auto *functionTableInstance() {
             TRAIT_FTABLE_FUNCTION f1;                                          \
             TRAIT_FTABLE_FUNCTION f2                                           \
         };                                                                     \
-        FunctionMemberDummy *p = nullptr;                                      \
+        tpimpl::FunctionMemberDummy *p = nullptr;                              \
         FunctionTable *_ftable = nullptr;                                      \
                                                                                \
         template <typename T>                                                  \
         name(T *p) {                                                           \
-            _ftable = functionTableInstance<T,                                 \
-                                            name,                              \
-                                            FunctionTable,                     \
-                                            TRAIT_CONSTRUCTOR_FUNCTION f1,     \
-                                            TRAIT_CONSTRUCTOR_FUNCTION f2>();  \
-            this->p = reinterpret_cast<FunctionMemberDummy *>(p);              \
+            _ftable = tpimpl::functionTableInstance<                           \
+                T,                                                             \
+                name,                                                          \
+                FunctionTable,                                                 \
+                TRAIT_CONSTRUCTOR_FUNCTION f1,                                 \
+                TRAIT_CONSTRUCTOR_FUNCTION f2>();                              \
+            this->p = reinterpret_cast<tpimpl::FunctionMemberDummy *>(p);      \
         }                                                                      \
                                                                                \
         TRAIT_FUNCTION_DEFINITION f1 TRAIT_FUNCTION_DEFINITION f2              \
