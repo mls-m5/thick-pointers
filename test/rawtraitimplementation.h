@@ -36,7 +36,7 @@ public:
 
     // Alternative... trashes ide-help, but works
     template <typename... Args>
-    auto jump(Args... args) {
-        return (_p->*_ftable->jump)(args...);
+    auto jump(Args &&...args) {
+        return (_p->*_ftable->jump)(std::forward<Args>(args)...);
     }
 };

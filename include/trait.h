@@ -1,4 +1,5 @@
 #pragma once
+#include <utility>
 
 namespace tpimpl {
 
@@ -36,8 +37,8 @@ struct FunctionTableInstance {
 
 #define TRAIT_FUNCTION_DEFINITION(name, ret, args)                             \
     template <typename... Args>                                                \
-    auto name(Args... a) {                                                     \
-        return (_p->*_ftable->name)(a...);                                     \
+    auto name(Args &&...a) {                                                   \
+        return (_p->*_ftable->name)(std::forward<Args>(a)...);                 \
     }
 
 #define Trait1(name, f1)                                                       \
