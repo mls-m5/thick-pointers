@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <utility>
 
 namespace tpimpl {
@@ -16,13 +17,27 @@ struct FunctionTypeStruct {
     constexpr static inline FunctionType FP = FunctionValue;
 };
 
+// Used to send template parameters in larger packs
+template <typename Type>
+struct FunctionDestructorStruct {
+    using FT = void (*)(void *);
+    using OFT = void (*)(void *);
+    constexpr static inline OFT FP = [](void *ptr) {
+        auto t = reinterpret_cast<Type *>(ptr);
+        delete t;
+    };
+};
+
 /// Create a single trait function table per class
 template <typename Type, typename Trait, typename Table, typename... FuncS>
 struct FunctionTableInstance {
-    // I would prefere to not create this on the heap, but the compiler throws
-    // mysterious type conversion error when not so I give up
-    const static inline Table *table =
-        new Table{reinterpret_cast<typename FuncS::FT>(FuncS::FP)...};
+    // I would prefere to not create this like his, but the compiler throws
+    // mysterious type conversion error when trying to compiling without using
+    // new not I give up
+    static inline std::array<char, sizeof(Table)> data = {};
+
+    const static inline Table *table = new (data.data())
+        Table{reinterpret_cast<typename FuncS::FT>(FuncS::FP)...};
 };
 
 } // namespace tpimpl
@@ -41,10 +56,11 @@ struct FunctionTableInstance {
         return (_p->*_ftable->name)(std::forward<Args>(a)...);                 \
     }
 
-#define Trait1(name, f1)                                                       \
+#define TRAIT_INTERNAL(name, TABLE, CONSTRUCTOR, FDEFINITION)                  \
     class name {                                                               \
         struct FunctionTable {                                                 \
-            TRAIT_FTABLE_FUNCTION f1;                                          \
+            void (*destructor)(void *ptr);                                     \
+            TABLE                                                              \
         };                                                                     \
         tpimpl::FunctionMemberDummy *_p = nullptr;                             \
         const FunctionTable *_ftable = nullptr;                                \
@@ -58,35 +74,24 @@ struct FunctionTableInstance {
                 T,                                                             \
                 name,                                                          \
                 FunctionTable,                                                 \
-                TRAIT_CONSTRUCTOR_FUNCTION f1>::table;                         \
+                tpimpl::FunctionDestructorStruct<T>,                           \
+                CONSTRUCTOR>::table;                                           \
             this->_p = reinterpret_cast<tpimpl::FunctionMemberDummy *>(_p);    \
         }                                                                      \
                                                                                \
-        TRAIT_FUNCTION_DEFINITION f1                                           \
+        FDEFINITION                                                            \
     };
 
+#define EXPAND(...) __VA_ARGS__
+
+#define Trait1(name, f1)                                                       \
+    TRAIT_INTERNAL(                                                            \
+        name, TRAIT_FTABLE_FUNCTION f1;                                        \
+        , EXPAND(TRAIT_CONSTRUCTOR_FUNCTION f1), TRAIT_FUNCTION_DEFINITION f1)
+
 #define Trait2(name, f1, f2)                                                   \
-    class name {                                                               \
-        struct FunctionTable {                                                 \
-            TRAIT_FTABLE_FUNCTION f1;                                          \
-            TRAIT_FTABLE_FUNCTION f2                                           \
-        };                                                                     \
-        tpimpl::FunctionMemberDummy *_p = nullptr;                             \
-        const FunctionTable *_ftable = nullptr;                                \
-                                                                               \
-    public:                                                                    \
-        name() = default;                                                      \
-                                                                               \
-        template <typename T>                                                  \
-        name(T *_p) {                                                          \
-            _ftable = tpimpl::FunctionTableInstance<                           \
-                T,                                                             \
-                name,                                                          \
-                FunctionTable,                                                 \
-                TRAIT_CONSTRUCTOR_FUNCTION f1,                                 \
-                TRAIT_CONSTRUCTOR_FUNCTION f2>::table;                         \
-            this->_p = reinterpret_cast<tpimpl::FunctionMemberDummy *>(_p);    \
-        }                                                                      \
-                                                                               \
-        TRAIT_FUNCTION_DEFINITION f1 TRAIT_FUNCTION_DEFINITION f2              \
-    };
+    TRAIT_INTERNAL(                                                            \
+        name, TRAIT_FTABLE_FUNCTION f1; TRAIT_FTABLE_FUNCTION f2;              \
+        ,                                                                      \
+        EXPAND(TRAIT_CONSTRUCTOR_FUNCTION f1, TRAIT_CONSTRUCTOR_FUNCTION f2),  \
+        TRAIT_FUNCTION_DEFINITION f1 TRAIT_FUNCTION_DEFINITION f2)

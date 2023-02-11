@@ -5,6 +5,7 @@
 // This is a reference implementation to base macros on
 class RawMovable {
     struct FunctionTable {
+        void (*destructor)(void *ptr);
         void (tpimpl::FunctionMemberDummy::*move)(int, int);
         float (tpimpl::FunctionMemberDummy::*jump)(bool);
     };
@@ -15,10 +16,13 @@ class RawMovable {
 public:
     template <typename T>
     RawMovable(T *p) {
+        auto destructor = [](T *ptr) { delete ptr; };
+
         _ftable = tpimpl::FunctionTableInstance<
             T,
             RawMovable,
             FunctionTable,
+            tpimpl::FunctionDestructorStruct<T>,
             tpimpl::FunctionTypeStruct<decltype(FunctionTable::move),
                                        decltype(&T::move),
                                        &T::move>,
