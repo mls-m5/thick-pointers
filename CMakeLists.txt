@@ -39,3 +39,4 @@ endfunction()
 
 test(basic)
 test(constructor)
+test(owning)

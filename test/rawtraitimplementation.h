@@ -4,6 +4,7 @@
 
 // This is a reference implementation to base macros on
 class RawMovable {
+protected:
     struct FunctionTable {
         void (*destructor)(void *ptr);
         void (tpimpl::FunctionMemberDummy::*move)(int, int);
@@ -29,7 +30,7 @@ public:
             tpimpl::FunctionTypeStruct<decltype(FunctionTable::jump),
                                        decltype(&T::jump),
                                        &T::jump>>::table;
-        this->_p = reinterpret_cast<tpimpl::FunctionMemberDummy *>(_p);
+        this->_p = reinterpret_cast<tpimpl::FunctionMemberDummy *>(p);
     }
 
     RawMovable() = default;
@@ -44,3 +45,36 @@ public:
         return (_p->*_ftable->jump)(std::forward<Args>(args)...);
     }
 };
+
+class RawUniqueMovable : public RawMovable {
+public:
+    template <typename T>
+    RawUniqueMovable(T *p)
+        : RawMovable{p} {}
+
+    RawUniqueMovable(RawUniqueMovable &&other) {
+        _p = other._p;
+        other._p = nullptr;
+    }
+
+    RawUniqueMovable(const RawUniqueMovable &other) = delete;
+
+    RawUniqueMovable &operator=(RawUniqueMovable &&other) {
+        _p = other._p;
+        other._p = nullptr;
+        return *this;
+    }
+
+    RawUniqueMovable &operator=(const RawUniqueMovable &other) = delete;
+
+    ~RawUniqueMovable() {
+        if (_p) {
+            _ftable->destructor(_p);
+        }
+    }
+};
+
+template <typename T, typename... Args>
+RawUniqueMovable makeUniqueMovable(Args... args) {
+    return RawUniqueMovable{new T{args...}};
+}

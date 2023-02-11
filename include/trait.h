@@ -69,29 +69,40 @@ struct FunctionTableInstance {
         name() = default;                                                      \
                                                                                \
         template <typename T>                                                  \
-        name(T *_p) {                                                          \
+        name(T *p) {                                                           \
             _ftable = tpimpl::FunctionTableInstance<                           \
                 T,                                                             \
                 name,                                                          \
                 FunctionTable,                                                 \
                 tpimpl::FunctionDestructorStruct<T>,                           \
                 CONSTRUCTOR>::table;                                           \
-            this->_p = reinterpret_cast<tpimpl::FunctionMemberDummy *>(_p);    \
+            this->_p = reinterpret_cast<tpimpl::FunctionMemberDummy *>(p);     \
         }                                                                      \
                                                                                \
         FDEFINITION                                                            \
     };
 
-#define EXPAND(...) __VA_ARGS__
+#define TRAIT_EXPAND(...) __VA_ARGS__
 
 #define Trait1(name, f1)                                                       \
-    TRAIT_INTERNAL(                                                            \
-        name, TRAIT_FTABLE_FUNCTION f1;                                        \
-        , EXPAND(TRAIT_CONSTRUCTOR_FUNCTION f1), TRAIT_FUNCTION_DEFINITION f1)
+    TRAIT_INTERNAL(name, TRAIT_FTABLE_FUNCTION f1;                             \
+                   ,                                                           \
+                   TRAIT_EXPAND(TRAIT_CONSTRUCTOR_FUNCTION f1),                \
+                   TRAIT_FUNCTION_DEFINITION f1)
 
 #define Trait2(name, f1, f2)                                                   \
-    TRAIT_INTERNAL(                                                            \
-        name, TRAIT_FTABLE_FUNCTION f1; TRAIT_FTABLE_FUNCTION f2;              \
-        ,                                                                      \
-        EXPAND(TRAIT_CONSTRUCTOR_FUNCTION f1, TRAIT_CONSTRUCTOR_FUNCTION f2),  \
-        TRAIT_FUNCTION_DEFINITION f1 TRAIT_FUNCTION_DEFINITION f2)
+    TRAIT_INTERNAL(name, TRAIT_FTABLE_FUNCTION f1; TRAIT_FTABLE_FUNCTION f2;   \
+                   ,                                                           \
+                   TRAIT_EXPAND(TRAIT_CONSTRUCTOR_FUNCTION f1,                 \
+                                TRAIT_CONSTRUCTOR_FUNCTION f2),                \
+                   TRAIT_FUNCTION_DEFINITION f1 TRAIT_FUNCTION_DEFINITION f2)
+
+#define Trait3(name, f1, f2, f3)                                               \
+    TRAIT_INTERNAL(name, TRAIT_FTABLE_FUNCTION f1; TRAIT_FTABLE_FUNCTION f2;   \
+                   TRAIT_FTABLE_FUNCTION f3;                                   \
+                   ,                                                           \
+                   TRAIT_EXPAND(TRAIT_CONSTRUCTOR_FUNCTION f1,                 \
+                                TRAIT_CONSTRUCTOR_FUNCTION f2,                 \
+                                TRAIT_CONSTRUCTOR_FUNCTION f3),                \
+                   TRAIT_FUNCTION_DEFINITION f1 TRAIT_FUNCTION_DEFINITION f2   \
+                       TRAIT_FUNCTION_DEFINITION f3)
