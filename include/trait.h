@@ -80,6 +80,34 @@ struct FunctionTableInstance {
         }                                                                      \
                                                                                \
         FDEFINITION                                                            \
+        friend class name##_Owning;                                            \
+    };                                                                         \
+    class name##_Owning : public name {                                        \
+    public:                                                                    \
+        template <typename T>                                                  \
+        name##_Owning(T *p)                                                    \
+            : name{p} {}                                                       \
+                                                                               \
+        name##_Owning(name##_Owning &&other) {                                 \
+            _p = other._p;                                                     \
+            other._p = nullptr;                                                \
+        }                                                                      \
+                                                                               \
+        name##_Owning(const name##_Owning &other) = delete;                    \
+                                                                               \
+        name##_Owning &operator=(name##_Owning &&other) {                      \
+            _p = other._p;                                                     \
+            other._p = nullptr;                                                \
+            return *this;                                                      \
+        }                                                                      \
+                                                                               \
+        name##_Owning &operator=(const name##_Owning &other) = delete;         \
+                                                                               \
+        ~name##_Owning() {                                                     \
+            if (_p) {                                                          \
+                _ftable->destructor(_p);                                       \
+            }                                                                  \
+        }                                                                      \
     };
 
 #define TRAIT_EXPAND(...) __VA_ARGS__
