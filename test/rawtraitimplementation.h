@@ -54,7 +54,9 @@ public:
 
     RawUniqueMovable(RawUniqueMovable &&other) {
         _p = other._p;
+        _ftable = other._ftable;
         other._p = nullptr;
+        other._ftable = nullptr;
     }
 
     RawUniqueMovable(const RawUniqueMovable &other) = delete;
