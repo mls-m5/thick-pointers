@@ -92,7 +92,7 @@ struct FunctionTableInstance {
             _p = other._p;                                                     \
             _ftable = other._ftable;                                           \
             other._p = nullptr;                                                \
-            _ftable = nullptr;                                                 \
+            other._ftable = nullptr;                                           \
         }                                                                      \
                                                                                \
         name##_Owning(const name##_Owning &other) = delete;                    \
