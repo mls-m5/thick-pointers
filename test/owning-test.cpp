@@ -5,9 +5,9 @@
 #include "trait.h"
 #include <iostream>
 
-Trait2(Movable,                       //
-       (move, void, (int x, int y),), //
-       (jump, void, (bool), )         //
+Trait2(Movable,                        //
+       (move, void, (int x, int y), ), //
+       (jump, void, (bool), )          //
 );
 
 struct SomethingThatMoves {

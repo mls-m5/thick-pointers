@@ -1,7 +1,7 @@
 #include "trait.h"
 #include <iostream>
 
-Trait1(Movable,                 //
+Trait1(Movable,                   //
        (move, void, (int, int), ) //
 );
 

@@ -37,10 +37,10 @@ function, but that is more than I want to mess around with macros.
 
 Create a trait, that defines a set of functions that you want to call
 ```c++
-Trait3(Movable,                    //
-       (move, void, (int, int),),  //
-       (jump, void, (bool),),      //
-       (speed, int, (), const),    //
+Trait3(Movable,                     //
+       (move, void, (int, int), ),  //
+       (jump, void, (bool), ),      //
+       (speed, int, (), const),     //
 );
 ```
 
@@ -60,7 +60,7 @@ public:
         std::cout << "apa jumps" << std::endl;
     }
 
-    int speed() const{
+    int speed() const {
         return 10;
     }
 };
@@ -70,7 +70,7 @@ public:
     // Add another implementation
     // void move(int x, int y) { ... }
     // void jump(bool x) { ... }
-    int speed() const{
+    int speed() const {
         return 20;
     }
 };
@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
     auto p = Movable{&apa};
     p.move(10, 20);
     p.jump(true);
-    std::cout << "current speed" << p.speed()<< std::endl;
+    std::cout << "current speed" << p.speed() << std::endl;
 
     p = &bepa; // Reassign and use trait that uses Bepas functions instead
     p.move(10, 30);
