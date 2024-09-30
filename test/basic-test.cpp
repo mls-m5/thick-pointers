@@ -4,13 +4,13 @@
 
 // Traits can be defined before or after the class is defined, it does not
 // matter
-Trait1(Movable,                 //
-       (move, void, (int, int)) //
+Trait1(Movable,                  //
+       (move, void, (int, int),) //
 );
 
-Trait2(ComplexMovable,           //
-       (move, void, (int, int)), //
-       (jump, float, (bool))     //
+Trait2(ComplexMovable,            //
+       (move, void, (int, int),), //
+       (jump, float, (bool),)     //
 );
 
 class Apa {

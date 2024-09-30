@@ -2,7 +2,7 @@
 #include <iostream>
 
 Trait1(Movable,                 //
-       (move, void, (int, int)) //
+       (move, void, (int, int), ) //
 );
 
 struct Apa {
