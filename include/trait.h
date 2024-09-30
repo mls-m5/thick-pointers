@@ -42,17 +42,17 @@ struct FunctionTableInstance {
 
 } // namespace tpimpl
 
-#define TRAIT_FTABLE_FUNCTION(name, ret, args)                                 \
+#define TRAIT_FTABLE_FUNCTION(name, ret, args, cv)                             \
     ret(tpimpl::FunctionMemberDummy::*name) args;
 
-#define TRAIT_CONSTRUCTOR_FUNCTION(name, ret, args)                            \
+#define TRAIT_CONSTRUCTOR_FUNCTION(name, ret, args, cv)                        \
     tpimpl::FunctionTypeStruct<decltype(FunctionTable::name),                  \
                                decltype(&T::name),                             \
                                &T::name>
 
-#define TRAIT_FUNCTION_DEFINITION(name, ret, args)                             \
+#define TRAIT_FUNCTION_DEFINITION(name, ret, args, cv)                         \
     template <typename... Args>                                                \
-    auto name(Args &&...a) {                                                   \
+    auto name(Args &&...a) cv {                                                \
         return (_p->*_ftable->name)(std::forward<Args>(a)...);                 \
     }
 
