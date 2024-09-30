@@ -37,9 +37,10 @@ function, but that is more than I want to mess around with macros.
 
 Create a trait, that defines a set of functions that you want to call
 ```c++
-Trait2(Movable,                  //
-       (move, void, (int, int)), //
-       (jump, void, (bool))      //
+Trait3(Movable,                    //
+       (move, void, (int, int),),  //
+       (jump, void, (bool),),      //
+       (speed, int, (), const),    //
 );
 ```
 
@@ -58,6 +59,10 @@ public:
     void jump(bool x) {
         std::cout << "apa jumps" << std::endl;
     }
+
+    int speed() const{
+        return 10;
+    }
 };
 
 class Bepa {
@@ -65,6 +70,9 @@ public:
     // Add another implementation
     // void move(int x, int y) { ... }
     // void jump(bool x) { ... }
+    int speed() const{
+        return 20;
+    }
 };
 ```
 
@@ -83,10 +91,12 @@ int main(int argc, char *argv[]) {
     auto p = Movable{&apa};
     p.move(10, 20);
     p.jump(true);
+    std::cout << "current speed" << p.speed()<< std::endl;
 
     p = &bepa; // Reassign and use trait that uses Bepas functions instead
     p.move(10, 30);
     p.jump(false);
+    std::cout << "current speed" << p.speed() << std::endl;;
 }
 ```
 
@@ -95,8 +105,10 @@ Example output:
 ```
 apa moves 10, 20
 apa jumps
+current speed 10
 bepa moves 10, 30
 bepa jumps
+current speed 20
 ```
 
 You could also send the pointer to functions if you want to do some usable
