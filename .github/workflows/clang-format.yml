@@ -1,0 +1,26 @@
+name: Clang-Format Check
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  format-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install clang-format
+        run: sudo apt-get install -y clang-format
+
+      - name: Check code formatting
+        run: |
+          # Check formatting in include and test directories
+          find include test -name '*.cpp' -o -name '*.h' | xargs clang-format --dry-run --Werror
+        shell: bash
